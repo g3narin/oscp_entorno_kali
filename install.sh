@@ -34,14 +34,13 @@ for dir in "$HOME"/* "$HOME"/.*; do
     continue
   fi
 
-  # NO borrar .config (se sobreescribe luego)
+  # NO borrar .config
   [[ "$name" == ".config" ]] && continue
 
-  # borrar resto
   rm -rf "$dir"
 done
 
-# crear carpetas si no existen
+# crear carpetas base si no existen
 for d in "${KEEP_DIRS[@]}"; do
   mkdir -p "$HOME/$d"
 done
@@ -52,6 +51,7 @@ done
 echo "[+] Copiando contenido de home/ → \$HOME"
 
 cp -a "$BASE_DIR/home/." "$HOME/"
+
 # =============================================
 # 3. COPIAR CONFIG
 # =============================================
@@ -90,18 +90,22 @@ sudo apt install -y \
 # =============================================
 # 6. ZSH + OH-MY-ZSH
 # =============================================
+
+# cambiar shell por defecto (NO abre zsh)
 if [[ "$SHELL" != *zsh ]]; then
   echo "[+] Cambiando shell por defecto a zsh..."
   chsh -s "$(which zsh)"
 fi
 
+# instalar Oh My Zsh (sin ejecutar zsh)
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   echo "[+] Instalando Oh My Zsh..."
   RUNZSH=no CHSH=no sh -c \
     "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+# plugins
+ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
 
 echo "[+] Instalando plugins ZSH..."
 
@@ -111,12 +115,6 @@ git clone https://github.com/zsh-users/zsh-autosuggestions \
 git clone https://github.com/zsh-users/zsh-syntax-highlighting \
   "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" 2>/dev/null || true
 
-# asegurar plugins en .zshrc
-if ! grep -q "zsh-autosuggestions" "$HOME/.zshrc"; then
-  sed -i 's/^plugins=(/plugins=(zsh-autosuggestions zsh-syntax-highlighting /' "$HOME/.zshrc"
-fi
-cp -f "$BASE_DIR/home/.zshrc" "$HOME/.zshrc"
-source "$HOME/.zshrc"
 # =============================================
 # 7. PERMISOS
 # =============================================
@@ -128,5 +126,5 @@ chmod -R u+rwX "$HOME"
 echo
 echo "=============================================="
 echo " ✅ Instalación completada correctamente"
-echo " 👉 Reinicia sesión o ejecuta: exec zsh"
+echo " 👉 Cierra sesión o ejecuta: exec zsh"
 echo "=============================================="
