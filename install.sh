@@ -17,11 +17,11 @@ BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 echo "[+] Iniciando instalación desde: $BASE_DIR"
 
 # =============================================
-# 0. BACKUP ZSHRC (CRÍTICO)
+# 0. BACKUP ZSHRC (OPCIONAL, POR SI ACASO)
 # =============================================
 if [[ -f "$HOME/.zshrc" ]]; then
-  echo "[+] Respaldando .zshrc existente"
-  cp "$HOME/.zshrc" "$HOME/.zshrc.pre-installer"
+  echo "[+] Backup de .zshrc actual"
+  cp "$HOME/.zshrc" "$HOME/.zshrc.bak"
 fi
 
 # =============================================
@@ -46,11 +46,11 @@ for d in "${KEEP_DIRS[@]}"; do
 done
 
 # =============================================
-# 2. COPIAR HOME DOTFILES (EXCEPTO .zshrc)
+# 2. COPIAR HOME DOTFILES (INCLUYE .zshrc)
 # =============================================
-echo "[+] Copiando contenido de home/ → \$HOME"
+echo "[+] Copiando home/ → \$HOME (incluye .zshrc)"
 
-rsync -a --exclude=".zshrc" "$BASE_DIR/home/" "$HOME/"
+cp -af "$BASE_DIR/home/." "$HOME/"
 
 # =============================================
 # 3. COPIAR CONFIG
@@ -89,7 +89,7 @@ sudo apt install -y \
   rsync
 
 # =============================================
-# 6. ZSH + OH-MY-ZSH (SEGURO)
+# 6. ZSH + OH-MY-ZSH
 # =============================================
 if [[ "$SHELL" != *zsh ]]; then
   echo "[+] Cambiando shell por defecto a zsh..."
@@ -103,15 +103,7 @@ if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
 fi
 
 # =============================================
-# 7. RESTAURAR TU .ZSHRC (CLAVE)
-# =============================================
-if [[ -f "$HOME/.zshrc.pre-installer" ]]; then
-  echo "[+] Restaurando .zshrc personalizado"
-  mv "$HOME/.zshrc.pre-installer" "$HOME/.zshrc"
-fi
-
-# =============================================
-# 8. PLUGINS ZSH
+# 7. PLUGINS ZSH
 # =============================================
 ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
 
@@ -124,6 +116,13 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting \
   "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" 2>/dev/null || true
 
 # =============================================
+# 8. SOURCE REAL DE TU ZSHRC (CLAVE 🔥)
+# =============================================
+echo "[+] Cargando .zshrc en zsh interactivo..."
+
+zsh -ic 'source ~/.zshrc'
+
+# =============================================
 # 9. PERMISOS
 # =============================================
 chmod -R u+rwX "$HOME"
@@ -134,5 +133,5 @@ chmod -R u+rwX "$HOME"
 echo
 echo "=============================================="
 echo " ✅ Instalación completada correctamente"
-echo " 👉 Ejecuta: exec zsh (o cierra sesión)"
+echo " 👉 Tu zsh YA está cargado"
 echo "=============================================="
