@@ -1,5 +1,6 @@
 # i3 config file (v4)
 # https://i3wm.org/docs/userguide.html
+# Migrado desde bspwm – g3k style 😈
 
 # ─── Modificador ───────────────────────────────
 set $mod Mod4
@@ -7,18 +8,28 @@ set $mod Mod4
 # ─── Fuente ────────────────────────────────────
 font pango:Terminus 20
 
-# ─── Autostart ─────────────────────────────────
-exec --no-startup-id dex --autostart --environment i3
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+# ─── Variables ─────────────────────────────────
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+
+# ─── Entorno ───────────────────────────────────
+exec --no-startup-id sh -c 'export _JAVA_AWT_WM_NONREPARENTING=1'
+exec --no-startup-id sh -c 'export XDG_CURRENT_DESKTOP=i3'
 exec --no-startup-id nm-applet
+
 exec_always --no-startup-id ~/.config/polybar/launch.sh
-#exec --no-startup-id bash ~/.config/polybar/launch.sh
 
-#si es maquina virtual usar xreder, si es dispositivo fisico glx
-#exec_always --no-startup-id sh -c "sleep 2 && picom --config ~/.config/picom/picom.conf --backend glx"
-#exec_always --no-startup-id sh -c "sleep 2 && picom --backend xrender --config ~/.config/picom/picom.conf"
+exec --no-startup-id dunst
+exec --no-startup-id picom --config ~/.config/picom/picom.conf -b
 
-exec --no-startup-id feh --bg-scale ~/Pictures/.wallpapers/fp3.png
+exec --no-startup-id eww daemon --config ~/.config/eww
+exec --no-startup-id sh -c "sleep 2 && eww open bar --config ~/.config/eww"
+
+# Wallpaper random (igual a bspwm)
+exec --no-startup-id sh -c 'WALL=$((RANDOM % 3 + 1)); feh --bg-scale ~/.config/wallpapers/img${WALL}.png'
 
 # ─── Volumen ───────────────────────────────────
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -30,42 +41,37 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 # ─── Mouse ─────────────────────────────────────
 floating_modifier $mod
 tiling_drag modifier titlebar
+focus_follows_mouse yes
 
 # ─── Terminal ──────────────────────────────────
 bindsym $mod+Return exec --no-startup-id kitty --working-directory $HOME
 
 # ─── Kill ventana ──────────────────────────────
-bindsym $mod+Shift+q kill
+bindsym $mod+x kill
 
 # ─── Lanzador ──────────────────────────────────
 bindsym $mod+d exec --no-startup-id rofi -show drun
-# alternativa moderna (comentada):
-# bindsym $mod+d exec --no-startup-id rofi -modi drun,run -show drun
 
 # ─── Movimiento entre ventanas ─────────────────
-bindsym $mod+j focus left
-bindsym $mod+k focus down
-bindsym $mod+l focus up
-bindsym $mod+t focus right
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
 bindsym $mod+Left focus left
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up
-bindsym $mod+p focus right
+bindsym $mod+Right focus right
 
 # ─── Mover ventanas ────────────────────────────
-bindsym $mod+Shift+j resize grow width 10 px or 10 ppt
-bindsym $mod+Shift+k resize shrink width 10 px or 10 ppt
-
-bindsym $mod+Shift+l move up
-bindsym $mod+Shift+ntilde move right
-bindsym $mod+Shift+Left move left
-bindsym $mod+Shift+Down move down
-bindsym $mod+Shift+Up move up
-bindsym $mod+Shift+Right move right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
 
 # ─── Divisiones ────────────────────────────────
-bindsym $mod+h split h
 bindsym $mod+v split v
+bindsym $mod+b split h
 
 # ─── Pantalla completa ─────────────────────────
 bindsym $mod+f fullscreen toggle
@@ -83,32 +89,20 @@ bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
 
 # ─── Workspaces ────────────────────────────────
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-#set $ws6 "6"
-#set $ws7 "7"
-#set $ws8 "8"
-
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2
 bindsym $mod+3 workspace number $ws3
 bindsym $mod+4 workspace number $ws4
 bindsym $mod+5 workspace number $ws5
-#bindsym $mod+6 workspace number $ws6
-#bindsym $mod+7 workspace number $ws7
-#bindsym $mod+8 workspace number $ws8
 
 bindsym $mod+Shift+1 move container to workspace number $ws1
 bindsym $mod+Shift+2 move container to workspace number $ws2
 bindsym $mod+Shift+3 move container to workspace number $ws3
 bindsym $mod+Shift+4 move container to workspace number $ws4
 bindsym $mod+Shift+5 move container to workspace number $ws5
-#bindsym $mod+Shift+6 move container to workspace number $ws6
-#bindsym $mod+Shift+7 move container to workspace number $ws7
-#bindsym $mod+Shift+8 move container to workspace number $ws8
+
+# ─── VPN toggle (script intacto) ───────────────
+bindsym $mod+Shift+v exec --no-startup-id ~/.config/bspwm/scripts/vpn-toggle.sh
 
 # ─── Recargar, reiniciar y salir ───────────────
 bindsym $mod+Shift+c reload
@@ -117,10 +111,10 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m '¿Salir de i3?' -B 'Sí, sal
 
 # ─── Modo redimensionar ────────────────────────
 mode "resize" {
-    bindsym j resize shrink width 10 px or 10 ppt
-    bindsym k resize grow height 10 px or 10 ppt
-    bindsym l resize shrink height 10 px or 10 ppt
-    bindsym ntilde resize grow width 10 px or 10 ppt
+    bindsym h resize shrink width 10 px or 10 ppt
+    bindsym j resize grow height 10 px or 10 ppt
+    bindsym k resize shrink height 10 px or 10 ppt
+    bindsym l resize grow width 10 px or 10 ppt
 
     bindsym Left resize shrink width 10 px or 10 ppt
     bindsym Down resize grow height 10 px or 10 ppt
@@ -129,34 +123,37 @@ mode "resize" {
 
     bindsym Return mode "default"
     bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
 }
 bindsym $mod+r mode "resize"
 
-# ─── Gaps ───────────────────────────────────────
-gaps inner 5
-gaps outer 5
+# ─── Gaps (bspwm-like) ─────────────────────────
+gaps inner 9
+gaps outer 15
 
-# ─── Bordes ─────────────────────────────────────
-new_window pixel 2
-new_float  pixel 2
+# ─── Bordes ────────────────────────────────────
+new_window pixel 0
+new_float  pixel 0
 
+# ─── Colores ───────────────────────────────────
 client.focused          #ff0000 #ff0000 #ffffff #ff0000
 client.unfocused        #000000 #000000 #ffffff #000000
 client.focused_inactive #222222 #222222 #ffffff #222222
 client.urgent           #ff0000 #ff0000 #ffffff #ff0000
 
+# ─── Reglas (antes bspwm rules) ─────────────────
+for_window [class="FloatingTerm"] floating enable, move position center
+for_window [class="firefox"] move to workspace $ws3, focus
+for_window [class="Navigator"] move to workspace $ws3, focus
+for_window [class="burp"] move to workspace $ws4, focus
+for_window [class="bloodhound"] move to workspace $ws5, focus
+
 # ─── Sin barra de título ───────────────────────
 for_window [class=".*"] border pixel 0
-# ─── Flameshot ───────────────────────
-# Captura pantalla completa y guarda automáticamente en Pictures/Clipboard
-bindsym Control+s exec --no-startup-id flameshot full -p ~/Pictures/Clipboard
 
-# Captura área recortada interactiva
+# ─── Flameshot ─────────────────────────────────
+bindsym Control+s exec --no-startup-id flameshot full -p ~/Pictures/Clipboard
 bindsym Control+Shift+s exec --no-startup-id flameshot gui
 
-#Descactivar el beep
+# ─── Extras ────────────────────────────────────
 exec --no-startup-id xset -b
 
-#Colocar pantalla completa vmware, solo necesario si es VM
-#exec --no-startup-id xrandr --output Virtual-1 --mode 1920x1080
