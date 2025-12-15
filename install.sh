@@ -52,7 +52,7 @@ done
 echo "[+] Copiando contenido de home/ → \$HOME"
 
 cp -a "$BASE_DIR/home/." "$HOME/"
-cp -f "$BASE_DIR/home/.zshrc" "~/.zshrc"
+cp -f "$BASE_DIR/home/.zshrc" "$HOME/.zshrc"
 # =============================================
 # 3. COPIAR CONFIG
 # =============================================
