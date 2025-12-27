@@ -1,0 +1,381 @@
+JAJAJA 😈 ahora sí estamos en **setup GOD MODE OSCP**.
+Vamos a dejar **Flameshot + XFCE4** exactamente como quieres:
+
+* 🔢 **Capturas numeradas**
+* 📋 **Copiadas al clipboard**
+* 📂 **Guardadas en carpeta compartida**
+  👉 `/mnt/hgfs/notes/screenshots`
+* ⌨️ **Shortcuts tipo Super+S**
+
+---
+
+# 🧠 Idea clave (antes de empezar)
+
+En Kali XFCE:
+
+* Los **atajos** se configuran en *Keyboard → Application Shortcuts*
+* El comando debe ser **UNA sola línea**
+* Flameshot + xclip + notify-send = perfecto para OSCP
+
+---
+
+# 0️⃣ Verificar dependencias (por si acaso)
+
+```bash
+sudo apt update
+sudo apt install -y flameshot xclip libnotify-bin
+```
+
+---
+
+# 1️⃣ Crear carpeta en la carpeta compartida
+
+```bash
+mkdir -p /mnt/hgfs/notes/screenshots
+```
+
+Prueba:
+
+```bash
+touch /mnt/hgfs/notes/screenshots/test.png
+```
+
+Si aparece en Windows → ✅ seguimos.
+
+---
+
+# 2️⃣ Script base (adaptado a tu carpeta compartida)
+
+👉 **IMPORTANTE**: XFCE no maneja bien scripts largos inline,
+así que lo haremos **BIEN**: con scripts `.sh`.
+
+---
+
+## 📄 Script 1 — Captura COMPLETA
+
+```bash
+nano ~/bin/screenshot_full.sh
+```
+
+Pega:
+
+```bash
+#!/bin/bash
+
+DIR="/mnt/hgfs/notes/screenshots"
+mkdir -p "$DIR"
+
+n=$(ls "$DIR" 2>/dev/null | grep -Eo '^img[0-9]+\.png$' | sed 's/[^0-9]//g' | sort -n | tail -1)
+[ -z "$n" ] && n=0
+next=$((n+1))
+
+IMG="$DIR/img$next.png"
+
+flameshot full -p "$IMG" && \
+xclip -selection clipboard -t image/png -i "$IMG" && \
+notify-send "📸 Captura completa" "Guardada como img$next.png"
+```
+
+Guarda y sal.
+
+---
+
+## 📄 Script 2 — Captura con selector (GUI)
+
+```bash
+nano ~/bin/screenshot_gui.sh
+```
+
+Pega:
+
+```bash
+#!/bin/bash
+
+DIR="/mnt/hgfs/notes/screenshots"
+mkdir -p "$DIR"
+
+n=$(ls "$DIR" 2>/dev/null | grep -Eo '^img[0-9]+\.png$' | sed 's/[^0-9]//g' | sort -n | tail -1)
+[ -z "$n" ] && n=0
+next=$((n+1))
+
+IMG="$DIR/img$next.png"
+
+flameshot gui -p "$IMG" && \
+xclip -selection clipboard -t image/png -i "$IMG" && \
+notify-send "📸 Captura selección" "Guardada como img$next.png"
+```
+
+Guarda y sal.
+
+---
+
+# 3️⃣ Hacer ejecutables
+
+```bash
+chmod +x ~/bin/screenshot_full.sh
+chmod +x ~/bin/screenshot_gui.sh
+```
+
+Si `~/bin` no existe:
+
+```bash
+mkdir -p ~/bin
+```
+
+---
+
+# 4️⃣ Probar manualmente (ANTES de shortcuts)
+
+```bash
+~/bin/screenshot_full.sh
+```
+
+```bash
+~/bin/screenshot_gui.sh
+```
+
+✔️ Se guarda en `/mnt/hgfs/notes/screenshots`
+✔️ Se copia al clipboard
+✔️ Sale notificación
+
+Si esto funciona → shortcuts funcionan seguro.
+
+---
+
+# 5️⃣ Configurar atajos en XFCE4
+
+### 📍 Ve a:
+
+```
+Settings → Keyboard → Application Shortcuts
+```
+
+---
+
+## ⌨️ Atajo 1 — Captura completa
+
+* **Command:**
+
+```bash
+/home/envertex/bin/screenshot_full.sh
+```
+
+* Presiona:
+
+```
+Super + S
+```
+
+---
+
+## ⌨️ Atajo 2 — Captura GUI
+
+* **Command:**
+
+```bash
+/home/envertex/bin/screenshot_gui.sh
+```
+
+* Presiona:
+
+```
+Super + Shift + S
+```
+
+⚠️ Asegúrate de usar la **ruta absoluta**.
+
+---
+
+# 6️⃣ (Opcional) Desactivar capturas por defecto de XFCE
+
+Para evitar conflictos:
+
+En *Keyboard → Application Shortcuts*:
+
+* Borra:
+
+  * `Print`
+  * `Alt+Print`
+  * `Shift+Print`
+
+---
+
+# 🧪 Test final OSCP-style
+
+1. Apaga internet
+2. Presiona `Super + Shift + S`
+3. Selecciona algo
+4. Pega (`Ctrl + V`) en Obsidian
+5. Revisa que esté en:
+
+```
+/mnt/hgfs/notes/screenshots
+```
+
+🔥 Si eso pasa → estás listo para el examen.
+
+---
+
+# 🟩 Resultado final
+
+✅ Numeradas automáticamente
+✅ Clipboard instantáneo
+✅ Guardadas en carpeta compartida
+✅ Perfecto para reportes OSCP
+✅ Cero fricción durante el examen
+
+---
+
+Si quieres, lo siguiente puede ser:
+
+* 📝 **Auto-insertar capturas en Obsidian**
+* 🧠 **Template de reporte OSCP**
+* 🧷 **Renombrado automático por máquina**
+* 📑 **Script para screenshots por IP**
+
+Tú manda, crack 😎
+
+------------------------
+JAJA 😅 ok, **esto ya es el caso “VMware no está montando hgfs en absoluto”**, pero tranquilo: **tiene solución 100%**.
+Vamos a **forzar el montaje y verificar VMware desde adentro**, paso a paso.
+
+---
+
+# 🧠 Diagnóstico final (lo que ya sabemos)
+
+✔️ `open-vm-tools` instalado
+✔️ Shared Folder configurado (según tú)
+❌ `/mnt` vacío
+❌ `/mnt/hgfs` no aparece **ni siquiera creado**
+
+👉 Esto significa **VMware Workstation NO está exponiendo hgfs a la VM**, aunque tú lo hayas marcado en la UI.
+
+Esto pasa **MUCHO** en Kali + VMware.
+
+---
+
+# 🔥 SOLUCIÓN DEFINITIVA (sí o sí funciona)
+
+## 1️⃣ Crear el punto de montaje manualmente
+
+```bash
+sudo mkdir -p /mnt/hgfs
+```
+
+Verifica:
+
+```bash
+ls -ld /mnt/hgfs
+```
+
+---
+
+## 2️⃣ Montar hgfs A MANO (clave)
+
+```bash
+sudo vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other
+```
+
+⚠️ **Este comando es el que decide todo**
+
+Ahora:
+
+```bash
+ls -la /mnt/hgfs
+```
+
+### 👉 RESULTADO ESPERADO
+
+Deberías ver algo como:
+
+```text
+drwxr-xr-x  notes
+```
+
+Si **aquí aparece tu carpeta** → PROBLEMA RESUELTO.
+
+---
+
+## 3️⃣ Si el comando FALLA, dime el error EXACTO
+
+Ejemplo de errores típicos:
+
+* `vmhgfs-fuse: command not found`
+* `Transport endpoint is not connected`
+* `No such device`
+
+Cada uno tiene solución distinta.
+
+---
+
+# 🧪 Verificaciones críticas (ejecútalas TODAS)
+
+Pásame la salida de estos comandos, **tal cual**:
+
+```bash
+which vmhgfs-fuse
+```
+
+```bash
+ls /usr/bin/vmhgfs-fuse
+```
+
+```bash
+systemctl status open-vm-tools
+```
+
+```bash
+vmware-toolbox-cmd -v
+```
+
+---
+
+# 🛠️ Parche extra (si VMware está bugueado)
+
+Si `vmhgfs-fuse` existe pero no monta, ejecuta:
+
+```bash
+sudo systemctl restart open-vm-tools
+sudo vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other
+```
+
+---
+
+# 🧨 ÚLTIMA OPCIÓN (cuando VMware UI miente)
+
+VMware a veces **NO guarda Shared Folders** aunque los marques.
+
+Haz esto:
+
+1. Apaga la VM
+2. Cierra VMware COMPLETO
+3. Abre VMware como **Administrador**
+4. Reconfigura Shared Folders
+5. Arranca Kali
+6. Ejecuta el montaje manual otra vez
+
+---
+
+# 🟩 Conclusión honesta
+
+Lo que te pasa:
+
+* ❌ No es Linux
+* ❌ No es Kali
+* ❌ No es tu culpa
+* ✅ Es **VMware Workstation bug clásico**
+
+Con el **montaje manual**, esto **funciona sí o sí**.
+
+---
+
+Respóndeme **solo** con:
+
+* la salida del comando `sudo vmhgfs-fuse ...`
+* o el error exacto que te da
+
+y lo arreglamos en el siguiente mensaje 💪😎
+
+
+
+
