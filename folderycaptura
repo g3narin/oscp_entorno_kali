@@ -378,4 +378,85 @@ y lo arreglamos en el siguiente mensaje 💪😎
 
 
 
+--------------------------------------
+JAJA 😂 **ahhhh YA, ese era el problema real**.
+Perfecto, ahora sí: esto es **normal** y se soluciona **bien limpio y permanente**.
 
+---
+
+# 🧠 Qué pasa realmente
+
+* `vmhgfs-fuse` **NO se monta automáticamente** en algunas instalaciones de Kali
+* Al reiniciar:
+
+  * `/mnt/hgfs` desaparece
+  * El mount no se ejecuta
+* Por eso tienes que hacerlo a mano cada vez
+
+👉 **La solución correcta es hacerlo persistente**.
+
+---
+
+# ✅ SOLUCIÓN DEFINITIVA (PERSISTENTE)
+
+## 🟢 Opción 1 — `/etc/fstab` (RECOMENDADA)
+
+Esta es la forma **oficial y limpia**.
+
+---
+
+### 1️⃣ Crear el directorio (una sola vez)
+
+```bash
+sudo mkdir -p /mnt/hgfs
+```
+
+---
+
+### 2️⃣ Editar `/etc/fstab`
+
+```bash
+sudo nano /etc/fstab
+```
+
+Agrega **AL FINAL**:
+
+```text
+.host:/ /mnt/hgfs fuse.vmhgfs-fuse allow_other,auto_unmount 0 0
+```
+
+Guarda y sal (`CTRL+O`, `ENTER`, `CTRL+X`).
+
+---
+
+### 3️⃣ Probar SIN reiniciar
+
+```bash
+sudo mount -a
+```
+
+Luego:
+
+```bash
+ls /mnt/hgfs
+```
+
+Si ves `notes` → ✅ ya quedó.
+
+---
+
+### 4️⃣ Reinicia para confirmar
+
+```bash
+sudo reboot
+```
+
+Después del reboot:
+
+```bash
+ls /mnt/hgfs
+```
+
+🎉 **Nunca más tendrás que montar a mano**
+
+---
